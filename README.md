@@ -106,13 +106,12 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
    ```bash
    vercel
    ```
-
 4. **Set environment variables:**
    ```bash
    vercel env add MONGO_URI
    ```
 
-### Environment Variables
+### Environment Variable
 
 Set these in your Vercel dashboard:
 
