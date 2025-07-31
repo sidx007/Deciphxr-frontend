@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 let db;
-const mongoUri = process.env.MONGO_URI;
+const mongoUri = process.env.mongo_uri;
 const dbName = 'bot_database';
 const collectionName = 'notes';
 

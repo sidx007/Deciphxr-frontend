@@ -61,7 +61,7 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
 3. **Set up environment variables:**
    Create a `.env` file in the root directory:
    ```env
-   MONGO_URI=your_mongodb_atlas_connection_string
+   mongo_uri=your_mongodb_atlas_connection_string
    ```
 
 4. **Start development server:**
@@ -87,7 +87,7 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
 2. **Deploy to Vercel:**
    - Go to [vercel.com](https://vercel.com)
    - Import your GitHub repository
-   - Add environment variable: `MONGO_URI` with your MongoDB connection string
+   - Add environment variable: `mongo_uri` with your MongoDB connection string
    - Deploy!
 
 ### Manual Configuration
@@ -108,14 +108,14 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
    ```
 4. **Set environment variables:**
    ```bash
-   vercel env add MONGO_URI
+   vercel env add mongo_uri
    ```
 
 ### Environment Variable
 
 Set these in your Vercel dashboard:
 
-- `MONGO_URI`: Your MongoDB Atlas connection string
+- `mongo_uri`: Your MongoDB Atlas connection string
 
 ## 📊 Database Schema
 
