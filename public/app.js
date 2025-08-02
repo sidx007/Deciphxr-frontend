@@ -429,8 +429,11 @@ function addMessageToChat(role, content) {
     const now = new Date();
     const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
+    // Parse markdown for assistant messages, keep plain text for user messages
+    const formattedContent = role === 'assistant' ? marked.parse(content) : content;
+    
     messageDiv.innerHTML = `
-        <div class="message-content">${content}</div>
+        <div class="message-content">${formattedContent}</div>
         <div class="message-time">${timeString}</div>
     `;
     

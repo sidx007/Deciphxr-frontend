@@ -48,6 +48,16 @@ ${articleContent}
 
 Please answer questions based on this article content. If a question is not related to the article or cannot be answered using the information provided, politely explain that you can only help with questions about this specific article.
 If the question is related to the article but does not provide context, you can answer from your knowledge.
+
+IMPORTANT: Format your responses using markdown syntax:
+- Use **bold** for emphasis
+- Use *italics* for subtle emphasis  
+- Use \`code\` for technical terms or code snippets
+- Use bullet points with - or * for lists
+- Use numbered lists with 1. 2. 3. etc.
+- Use ### for section headers if needed
+- Use > for quotes or important callouts
+
 Keep your responses concise but informative. Use a friendly and helpful tone.`;
 
     // Build conversation history for context
