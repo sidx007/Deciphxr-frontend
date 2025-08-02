@@ -47,7 +47,7 @@ ${articleContent}
 ---
 
 Please answer questions based on this article content. If a question is not related to the article or cannot be answered using the information provided, politely explain that you can only help with questions about this specific article.
-
+If the question is related to the article but does not provide context, you can answer from your knowledge.
 Keep your responses concise but informative. Use a friendly and helpful tone.`;
 
     // Build conversation history for context
