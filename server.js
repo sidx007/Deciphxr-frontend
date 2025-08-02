@@ -2,6 +2,9 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 
+// Load environment variables
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -18,9 +21,13 @@ if (process.env.NODE_ENV !== 'production') {
   // Import API functions for local development
   const articlesHandler = require('./api/articles');
   const subjectsHandler = require('./api/subjects');
+  const chatHandler = require('./api/chat');
+  const statusHandler = require('./api/status');
   
   app.get('/api/articles', articlesHandler);
   app.get('/api/subjects', subjectsHandler);
+  app.post('/api/chat', chatHandler);
+  app.get('/api/status', statusHandler);
 }
 
 // Serve the main HTML file for all other routes

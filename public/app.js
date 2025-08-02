@@ -135,8 +135,14 @@ function filterPosts() {
 
 // Show blog post
 function showBlogPost(postId) {
+    console.log('showBlogPost called with postId:', postId);
     const post = blogPosts.find(p => p.id === postId);
-    if (!post) return;
+    if (!post) {
+        console.error('Post not found with id:', postId);
+        return;
+    }
+
+    console.log('Found post:', post.title);
 
     // Format content using marked.js for markdown parsing
     const formattedContent = marked.parse(post.content);
@@ -159,6 +165,24 @@ function showBlogPost(postId) {
         </div>
     `;
 
+    // Set current article content for chat
+    currentArticleContent = post.content;
+    console.log('Setting article content for chat');
+    
+    // Reset chat for new article (but don't hide the button)
+    resetChatMessages();
+    
+    // Show chat button
+    if (chatButton) {
+        console.log('Showing chat button');
+        chatButton.classList.remove('hidden');
+        chatButton.style.display = 'flex'; // Force display
+        console.log('Chat button classes after showing:', chatButton.classList.toString());
+        console.log('Chat button style.display:', chatButton.style.display);
+    } else {
+        console.error('chatButton not found when trying to show it');
+    }
+
     homePage.classList.add('hidden');
     blogPage.classList.remove('hidden');
     window.scrollTo(0, 0);
@@ -171,6 +195,9 @@ function showHomePage() {
     homePage.classList.remove('hidden');
     window.scrollTo(0, 0);
     header.classList.remove('header--collapsed');
+    
+    // Hide chat button and reset chat when returning to home
+    resetChat();
 }
 
 // Theme management
@@ -217,10 +244,15 @@ function attachEventListeners() {
 
     // Blog cards
     blogGrid.addEventListener('click', (e) => {
+        console.log('Blog grid clicked, target:', e.target);
         const card = e.target.closest('.blog-card');
+        console.log('Found card:', card);
         if (card) {
             const postId = card.dataset.postId;
+            console.log('Post ID:', postId);
             showBlogPost(postId);
+        } else {
+            console.log('No card found for click target');
         }
     });
 
@@ -235,7 +267,243 @@ function attachEventListeners() {
         if (e.key === 'Escape' && !blogPage.classList.contains('hidden')) {
             showHomePage();
         }
+        if (e.key === 'Escape' && chatSlider.classList.contains('active')) {
+            closeChatSlider();
+        }
     });
+
+    // Chat functionality
+    initChat();
+}
+
+// Chat functionality
+let currentArticleContent = '';
+let conversationHistory = [];
+
+// Chat DOM elements (will be initialized in initChat)
+let chatButton, chatOverlay, chatSlider, chatClose, chatMessages, chatForm, chatInput, chatSend;
+
+function initChat() {
+    // Initialize chat DOM elements
+    chatButton = document.getElementById('chat-button');
+    chatOverlay = document.getElementById('chat-overlay');
+    chatSlider = document.getElementById('chat-slider');
+    chatClose = document.getElementById('chat-close');
+    chatMessages = document.getElementById('chat-messages');
+    chatForm = document.getElementById('chat-form');
+    chatInput = document.getElementById('chat-input');
+    chatSend = document.getElementById('chat-send');
+
+    // Check if elements exist before adding event listeners
+    if (!chatButton || !chatOverlay || !chatSlider || !chatClose || !chatMessages || !chatForm || !chatInput || !chatSend) {
+        console.error('Chat elements not found in DOM:', {
+            chatButton: !!chatButton,
+            chatOverlay: !!chatOverlay,
+            chatSlider: !!chatSlider,
+            chatClose: !!chatClose,
+            chatMessages: !!chatMessages,
+            chatForm: !!chatForm,
+            chatInput: !!chatInput,
+            chatSend: !!chatSend
+        });
+        return;
+    }
+
+    console.log('Chat elements found successfully! Initializing chat...');
+
+    chatButton.addEventListener('click', openChatSlider);
+    chatClose.addEventListener('click', closeChatSlider);
+    chatOverlay.addEventListener('click', closeChatSlider);
+    chatForm.addEventListener('submit', sendChatMessage);
+    
+    // Auto-resize textarea
+    chatInput.addEventListener('input', autoResizeTextarea);
+    
+    // Enter to send (Shift+Enter for new line)
+    chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage(e);
+        }
+    });
+}
+
+function openChatSlider() {
+    if (chatOverlay && chatSlider && chatInput) {
+        chatOverlay.classList.add('active');
+        chatSlider.classList.add('active');
+        chatInput.focus();
+    }
+}
+
+function closeChatSlider() {
+    if (chatOverlay && chatSlider) {
+        chatOverlay.classList.remove('active');
+        chatSlider.classList.remove('active');
+    }
+}
+
+function autoResizeTextarea() {
+    if (chatInput) {
+        chatInput.style.height = 'auto';
+        chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+    }
+}
+
+async function sendChatMessage(e) {
+    e.preventDefault();
+    
+    const message = chatInput.value.trim();
+    if (!message || !currentArticleContent) return;
+    
+    // Disable input while sending
+    chatSend.disabled = true;
+    chatInput.disabled = true;
+    
+    // Add user message to chat
+    addMessageToChat('user', message);
+    
+    // Clear input
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    
+    // Show typing indicator
+    showTypingIndicator();
+    
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                articleContent: currentArticleContent,
+                conversationHistory: conversationHistory
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to get response');
+        }
+        
+        const data = await response.json();
+        
+        // Remove typing indicator
+        removeTypingIndicator();
+        
+        // Add assistant response
+        addMessageToChat('assistant', data.response);
+        
+        // Update conversation history
+        conversationHistory.push(
+            { role: 'user', content: message },
+            { role: 'assistant', content: data.response }
+        );
+        
+        // Keep conversation history reasonable size
+        if (conversationHistory.length > 20) {
+            conversationHistory = conversationHistory.slice(-20);
+        }
+        
+    } catch (error) {
+        console.error('Error sending message:', error);
+        
+        // Remove typing indicator
+        removeTypingIndicator();
+        
+        // Show error message
+        addMessageToChat('assistant', 'Sorry, I encountered an error. Please try again.');
+    } finally {
+        // Re-enable input
+        chatSend.disabled = false;
+        chatInput.disabled = false;
+        chatInput.focus();
+    }
+}
+
+function addMessageToChat(role, content) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${role}`;
+    
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    messageDiv.innerHTML = `
+        <div class="message-content">${content}</div>
+        <div class="message-time">${timeString}</div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showTypingIndicator() {
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'typing-indicator';
+    typingDiv.id = 'typing-indicator';
+    typingDiv.innerHTML = `
+        <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+        <span>AI is typing...</span>
+    `;
+    
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const typingIndicator = document.getElementById('typing-indicator');
+    if (typingIndicator) {
+        typingIndicator.remove();
+    }
+}
+
+function resetChat() {
+    // Clear conversation history
+    conversationHistory = [];
+    
+    // Clear messages except the initial greeting
+    if (chatMessages) {
+        const messages = chatMessages.querySelectorAll('.chat-message');
+        messages.forEach((message, index) => {
+            if (index > 0) { // Keep the first greeting message
+                message.remove();
+            }
+        });
+    }
+    
+    // Reset current article content
+    currentArticleContent = '';
+    
+    // Hide chat button
+    if (chatButton) {
+        chatButton.classList.add('hidden');
+    }
+    
+    // Close chat if open
+    closeChatSlider();
+}
+
+function resetChatMessages() {
+    // Clear conversation history
+    conversationHistory = [];
+    
+    // Clear messages except the initial greeting
+    if (chatMessages) {
+        const messages = chatMessages.querySelectorAll('.chat-message');
+        messages.forEach((message, index) => {
+            if (index > 0) { // Keep the first greeting message
+                message.remove();
+            }
+        });
+    }
+    
+    // Close chat if open
+    closeChatSlider();
 }
 
 // Initialize the application when DOM is loaded

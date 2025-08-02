@@ -9,10 +9,12 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "mongodb": "^6.3.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
@@ -20,7 +22,13 @@
   "engines": {
     "node": "18.x"
   },
-  "keywords": ["lecture", "notes", "mongodb", "express", "vercel"],
+  "keywords": [
+    "lecture",
+    "notes",
+    "mongodb",
+    "express",
+    "vercel"
+  ],
   "author": "Nowaysid",
   "license": "MIT"
 }

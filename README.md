@@ -8,6 +8,7 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
 - Filter articles by subject (tag functionality)
 - Search through articles by title, content, and tags
 - Markdown formatting support for article content
+- **AI-powered chatbot** for article Q&A using Google Gemini API
 - Responsive design with dark/light theme toggle
 - Clean, modern UI with glassmorphism effects
 - Instagram integration in footer
@@ -17,6 +18,7 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
 - **Frontend:** Vanilla JavaScript, HTML5, CSS3
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB Atlas
+- **AI:** Google Gemini API for chatbot functionality
 - **Deployment:** Vercel
 - **Styling:** Custom CSS with CSS Variables
 
@@ -25,7 +27,8 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
 ```
 ├── api/                    # Vercel serverless functions
 │   ├── articles.js        # Articles API endpoint
-│   └── subjects.js        # Subjects API endpoint
+│   ├── subjects.js        # Subjects API endpoint
+│   └── chat.js           # AI chatbot API endpoint
 ├── public/                # Static files
 │   ├── index.html         # Main HTML file
 │   ├── app.js            # Frontend JavaScript
@@ -62,6 +65,7 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
    Create a `.env` file in the root directory:
    ```env
    mongo_uri=your_mongodb_atlas_connection_string
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
 4. **Start development server:**
@@ -111,11 +115,12 @@ A modern web application for displaying AI-generated lecture notes from a MongoD
    vercel env add mongo_uri
    ```
 
-### Environment Variable
+### Environment Variables
 
 Set these in your Vercel dashboard:
 
 - `mongo_uri`: Your MongoDB Atlas connection string
+- `GEMINI_API_KEY`: Your Google Gemini API key for the chatbot functionality
 
 ## 📊 Database Schema
 
@@ -143,6 +148,13 @@ The application standardizes subjects to these categories:
 
 ## 🎨 Features Details
 
+### AI-Powered Chatbot
+- Context-aware conversations using Google Gemini API
+- Chat button appears when viewing individual articles
+- Sliding chat interface with conversation history
+- Questions answered based on article content
+- Responsive design with typing indicators
+
 ### Markdown Support
 - Full markdown rendering with headers, lists, links, code blocks
 - Automatic Python list parsing from database
@@ -163,6 +175,7 @@ The application standardizes subjects to these categories:
 
 - `GET /api/articles` - Fetch all articles with transformation
 - `GET /api/subjects` - Get unique subjects for filter buttons
+- `POST /api/chat` - AI chatbot for article Q&A (requires Gemini API key)
 
 ## 📱 Local Testing
 

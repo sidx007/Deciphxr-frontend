@@ -98,6 +98,41 @@
         </div>
     </footer>
 
+    <!-- Chat Components -->
+    <button id="chat-button" class="chat-button hidden">💬</button>
+    
+    <div id="chat-overlay" class="chat-overlay"></div>
+    
+    <div id="chat-slider" class="chat-slider">
+        <div class="chat-header">
+            <h3 class="chat-title">Ask about this article</h3>
+            <button id="chat-close" class="chat-close">×</button>
+        </div>
+        
+        <div id="chat-messages" class="chat-messages">
+            <div class="chat-message assistant">
+                <div class="message-content">
+                    Hi! I'm here to help you understand this article better. Feel free to ask me any questions about the content!
+                </div>
+                <div class="message-time">Just now</div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <form id="chat-form" class="chat-input-form">
+                <textarea 
+                    id="chat-input" 
+                    class="chat-input" 
+                    placeholder="Ask a question about this article..."
+                    rows="1"
+                ></textarea>
+                <button type="submit" id="chat-send" class="chat-send">
+                    <span>→</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
