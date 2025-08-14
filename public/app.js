@@ -93,7 +93,13 @@ function renderBlogPosts() {
     noResults.classList.add('hidden');
     
     blogGrid.innerHTML = filteredPosts.map(post => `
-        <article class="card blog-card" data-post-id="${post.id}">
+        <article class="card blog-card" data-post-id="${post.id}" style="position: relative;">
+            <button class="copy-btn" data-post-id="${post.id}" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.1); color: #666; border: none; padding: 8px; border-radius: 4px; cursor: pointer; z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); transition: all 0.2s;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+            </button>
             <div class="blog-card__content">
                 <div class="blog-card__category">${post.category}</div>
                 <h3 class="blog-card__title">${post.title}</h3>
@@ -114,6 +120,47 @@ function formatDate(dateString) {
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
+    });
+}
+
+// Copy article content
+function copyArticle(postId, button) {
+    const post = blogPosts.find(p => p.id === postId);
+    if (!post) return;
+    
+    const content = `${post.title}\n\n${post.content}`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(content).then(() => {
+        // Show feedback
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"></polyline></svg>';
+        button.style.background = 'rgba(5, 150, 105, 0.8)';
+        button.style.color = 'white';
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.style.background = 'rgba(0,0,0,0.1)';
+            button.style.color = '#666';
+        }, 1500);
+    }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        // Show feedback
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"></polyline></svg>';
+        button.style.background = 'rgba(5, 150, 105, 0.8)';
+        button.style.color = 'white';
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.style.background = 'rgba(0,0,0,0.1)';
+            button.style.color = '#666';
+        }, 1500);
     });
 }
 
@@ -245,6 +292,17 @@ function attachEventListeners() {
     // Blog cards
     blogGrid.addEventListener('click', (e) => {
         console.log('Blog grid clicked, target:', e.target);
+        
+        // Check if copy button was clicked
+        const copyBtn = e.target.closest('.copy-btn');
+        if (copyBtn) {
+            e.stopPropagation();
+            const postId = copyBtn.dataset.postId;
+            copyArticle(postId, copyBtn);
+            return;
+        }
+        
+        // Handle card click
         const card = e.target.closest('.blog-card');
         console.log('Found card:', card);
         if (card) {
